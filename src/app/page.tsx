@@ -53,6 +53,33 @@ export default function LandingPage() {
             </Link>
           </div>
 
+          <div className="w-full sm:w-auto">
+            <Link
+              href="/create-your-personalized-wellbeing-plan"
+              className="flex w-full whitespace-nowrap items-center justify-center rounded-xl border-2 border-blue-100 bg-white px-8 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 md:py-4 md:px-8 md:text-lg transition-all"
+            >
+              Create Your Wellbeing Plan
+            </Link>
+          </div>
+
+          <div className="w-full sm:w-auto">
+            <Link
+              href="/how-can-therapy-help"
+              className="flex w-full whitespace-nowrap items-center justify-center rounded-xl border-2 border-blue-100 bg-white px-8 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 md:py-4 md:px-8 md:text-lg transition-all"
+            >
+              How can Therapy Help
+            </Link>
+          </div>
+
+          <div className="w-full sm:w-auto">
+            <Link
+              href="/earn-while-you-improve-your-wellbeing"
+              className="flex w-full whitespace-nowrap items-center justify-center rounded-xl border-2 border-blue-100 bg-white px-8 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 md:py-4 md:px-8 md:text-lg transition-all"
+            >
+              Earn While You Improve
+            </Link>
+          </div>
+
         </div>
       </div>
 
