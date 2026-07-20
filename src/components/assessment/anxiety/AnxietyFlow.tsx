@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { QUESTIONS } from "./anxietyConfig";
+import { QUESTIONS, getSeverity } from "./anxietyConfig";
 import AnxietyIntro from "./AnxietyIntro";
 import AnxietyProgress from "./AnxietyProgress";
 import AnxietyQuestion from "./AnxietyQuestion";
 import AnxietyNavigation from "./AnxietyNavigation";
 import AnxietyResult from "./AnxietyResult";
+import { ensureAssessmentTable, saveAssessmentResult } from "@/lib/assessmentDb";
 
 type Step = "intro" | "question" | "result";
 
@@ -31,6 +32,11 @@ export default function AnxietyFlow() {
     );
 
     useEffect(() => {
+        // Ensure DB table exists (idempotent, non-blocking)
+        ensureAssessmentTable().catch((err) =>
+            console.warn("Failed to ensure assessment table:", err)
+        );
+
         return () => {
             if (advanceTimerRef.current) {
                 clearTimeout(advanceTimerRef.current);
@@ -145,11 +151,26 @@ export default function AnxietyFlow() {
 
         setSubmitting(true);
         const score = answers.reduce<number>((sum, a) => sum + (a ?? 0), 0);
+        const severity = getSeverity(score);
+        const userId = sessionStorage.getItem("user_id") ?? searchParams.get("user_id") ?? "unknown";
+
+        // Save to DB in parallel
+        saveAssessmentResult({
+            userId,
+            assessmentType: "anxiety",
+            responses: { raw: answers },
+            results: { score, severity },
+            metadata: {
+                activityId: searchParams.get("activity_id"),
+                upaId: searchParams.get("upa_id"),
+            },
+        }).catch((err) => console.error("Failed to save to DB:", err));
+
         // Trigger webhook in parallel with rendering the result (fire and forget).
         void fireWebhook(score);
         setSubmitting(false);
         setStep("result");
-    }, [answers, fireWebhook]);
+    }, [answers, fireWebhook, searchParams]);
 
     if (step === "intro") {
         return <AnxietyIntro onStart={handleStart} />;
@@ -173,8 +194,8 @@ export default function AnxietyFlow() {
             <div
                 key={questionIndex}
                 className={`transition-all duration-300 ease-out ${isTransitioning
-                        ? "translate-x-3 opacity-0"
-                        : "translate-x-0 opacity-100 animate-fade-slide-in"
+                    ? "translate-x-3 opacity-0"
+                    : "translate-x-0 opacity-100 animate-fade-slide-in"
                     }`}
             >
                 <AnxietyQuestion

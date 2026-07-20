@@ -9,6 +9,7 @@ import AssessmentProgress from "./AssessmentProgress";
 import AssessmentQuestion from "./AssessmentQuestion";
 import AssessmentNavigation from "./AssessmentNavigation";
 import AssessmentResult from "./AssessmentResult";
+import { ensureAssessmentTable, saveAssessmentResult } from "@/lib/assessmentDb";
 
 type Step = "intro" | "question" | "result";
 
@@ -24,6 +25,11 @@ export default function AssessmentFlow() {
     const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
+        // Ensure DB table exists (idempotent, non-blocking)
+        ensureAssessmentTable().catch((err) =>
+            console.warn("Failed to ensure assessment table:", err)
+        );
+
         return () => {
             if (advanceTimerRef.current) {
                 clearTimeout(advanceTimerRef.current);
@@ -95,9 +101,18 @@ export default function AssessmentFlow() {
         console.log("Assessment Scores:", scores);
         console.log("Severities:", severities);
 
-        // Trigger webhook (non-blocking)
         const upaId = searchParams.get("upa_id") ?? "";
         const activityId = searchParams.get("activity_id") ?? "";
+        const userId = sessionStorage.getItem("user_id") ?? searchParams.get("user_id") ?? "unknown";
+
+        // Save to DB in parallel
+        saveAssessmentResult({
+            userId,
+            assessmentType: "dass",
+            responses: { raw: answers },
+            results: { scores, severities },
+            metadata: { activityId, upaId },
+        }).catch((err) => console.error("Failed to save to DB:", err));
 
         try {
             await fetch("https://api.mantracare.org/webhook/assessment", {
