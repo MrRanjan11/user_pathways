@@ -128,6 +128,7 @@ export default function AssessmentFlow() {
                 body: JSON.stringify({
                     upa_id: upaId,
                     activity_id: activityId,
+                    user_id: userId,
                     scores,
                     severities,
                 }),

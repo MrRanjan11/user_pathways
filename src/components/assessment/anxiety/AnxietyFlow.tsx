@@ -122,7 +122,7 @@ export default function AnxietyFlow() {
 
             const activityId = searchParams.get("activity_id") ?? "";
             const upaId = searchParams.get("upa_id") ?? "";
-            const userId = searchParams.get("user_id") ?? "";
+            const userId = sessionStorage.getItem("user_id") ?? searchParams.get("user_id") ?? "";
 
             try {
                 await fetch("https://api.mantracare.org/webhook/assessment", {
