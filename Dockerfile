@@ -1,23 +1,25 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS base
+
+FROM base AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm i
+RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
-WORKDIR /usr/share/nginx/html
+FROM base AS runner
+WORKDIR /app
 
-# Copy the static files from the builder stage
-# For Next.js with output: 'export', static files are generated in 'out' folder
-COPY --from=builder /app/out /usr/share/nginx/html/user_pathways
+ENV NODE_ENV=production
+# Next.js standalone mode server port
+ENV PORT=80
+ENV HOSTNAME="0.0.0.0"
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY --from=builder /app/public ./public
+# Automatically leverage output traces to reduce image size
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Expose the port that Nginx will listen on
 EXPOSE 80
 
-# Command to start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server.js"]

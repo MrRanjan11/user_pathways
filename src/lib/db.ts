@@ -1,7 +1,13 @@
 import { neon } from "@neondatabase/serverless";
 
-const DATABASE_URL =
-    "postgresql://neondb_owner:npg_9F8AJiBVZPws@ep-silent-boat-azcixdcj.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+// Ensure this file is never sent to the client
+import "server-only";
+
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+    throw new Error("DATABASE_URL environment variable is missing.");
+}
 
 const sql = neon(DATABASE_URL);
 
