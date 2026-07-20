@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { QUESTIONS, getSeverity } from "./assessmentConfig";
+import { QUESTIONS, getSeverity, ANSWER_OPTIONS } from "./assessmentConfig";
 import type { Category } from "./assessmentConfig";
 import AssessmentIntro from "./AssessmentIntro";
 import AssessmentProgress from "./AssessmentProgress";
@@ -105,11 +105,18 @@ export default function AssessmentFlow() {
         const activityId = searchParams.get("activity_id") ?? "";
         const userId = sessionStorage.getItem("user_id") ?? searchParams.get("user_id") ?? "unknown";
 
+        const detailedResponses = answers.map((val, idx) => ({
+            question: QUESTIONS[idx].text,
+            category: QUESTIONS[idx].category,
+            value: val,
+            label: ANSWER_OPTIONS.find(o => o.value === val)?.label ?? "Unknown"
+        }));
+
         // Save to DB in parallel
         saveAssessmentResult({
             userId,
             assessmentType: "dass",
-            responses: { raw: answers },
+            responses: { detailed: detailedResponses, raw: answers },
             results: { scores, severities },
             metadata: { activityId, upaId },
         }).catch((err) => console.error("Failed to save to DB:", err));

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { QUESTIONS, getSeverity } from "./anxietyConfig";
+import { QUESTIONS, getSeverity, ANSWER_OPTIONS } from "./anxietyConfig";
 import AnxietyIntro from "./AnxietyIntro";
 import AnxietyProgress from "./AnxietyProgress";
 import AnxietyQuestion from "./AnxietyQuestion";
@@ -154,11 +154,17 @@ export default function AnxietyFlow() {
         const severity = getSeverity(score);
         const userId = sessionStorage.getItem("user_id") ?? searchParams.get("user_id") ?? "unknown";
 
+        const detailedResponses = answers.map((val, idx) => ({
+            question: QUESTIONS[idx].text,
+            value: val,
+            label: ANSWER_OPTIONS.find(o => o.value === val)?.label ?? "Unknown"
+        }));
+
         // Save to DB in parallel
         saveAssessmentResult({
             userId,
             assessmentType: "anxiety",
-            responses: { raw: answers },
+            responses: { detailed: detailedResponses, raw: answers },
             results: { score, severity },
             metadata: {
                 activityId: searchParams.get("activity_id"),
