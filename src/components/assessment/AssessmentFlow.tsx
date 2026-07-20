@@ -111,7 +111,7 @@ export default function AssessmentFlow() {
                 }),
             });
         } catch (err) {
-            console.error("Webhook failed (non-blocking):", err);
+            console.warn("Webhook failed (non-blocking):", err);
         }
 
         setSubmitting(false);
