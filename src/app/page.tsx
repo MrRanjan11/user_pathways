@@ -89,6 +89,15 @@ export default function LandingPage() {
             </Link>
           </div>
 
+          <div className="w-full sm:w-auto">
+            <Link
+              href="/anxiety-assessment"
+              className="flex w-full whitespace-nowrap items-center justify-center rounded-xl border-2 border-blue-100 bg-white px-8 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 md:py-4 md:px-8 md:text-lg transition-all"
+            >
+              Take Anxiety Assessment
+            </Link>
+          </div>
+
         </div>
       </div>
 
